@@ -1,0 +1,41 @@
+客户流失规则:
+    1. 用户注册时间超过6个月
+    2. 用户最后一单时间超过6个月
+
+1. 用户注册时间超过6个月
+SELECT
+c.id,
+c.`name`,
+c.create_date
+FROM
+t_customer AS c
+WHERE
+DATE_ADD(c.create_date,INTERVAL 6 MONTH) < NOW()
+
+2. 用户最后一单时间超过6个月
+    反向思维: 先筛选出有效客户,然后排除掉有效客户,就是流失客户
+    SELECT
+    DISTINCT co.cus_id
+    FROM
+    t_customer_order AS co
+    WHERE
+    DATE_ADD(co.order_date,INTERVAL 6 MONTH)>NOW()
+
+
+完整sql:
+SELECT
+c.*
+FROM
+t_customer AS c
+WHERE
+DATE_ADD(c.create_date,INTERVAL 6 MONTH) < NOW()
+and c.is_valid=1
+and
+c.id not in (
+    SELECT
+    DISTINCT co.cus_id
+    FROM
+    t_customer_order AS co
+    WHERE
+    DATE_ADD(co.order_date,INTERVAL 6 MONTH)>NOW()
+)
